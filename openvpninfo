@@ -1,0 +1,1316 @@
+nixCraft
+nixCraft → Howto → OpenVPN → How To Set Up an OpenVPN Server on Ubuntu
+How To Set up OpenVPN Server In 5 Minutes on Ubuntu Linux
+Author: Vivek Gite Last updated: January 27, 2024 105 comments
+See all OpenVPN related FAQIam a new Ubuntu Linux server user. How do I setup an OpenVPN Server on Ubuntu Linux version 18.04/20.04 LTS or 20.10 server to shield my browsing activity from bad guys on public Wi-Fi, and more?
+
+OpenVPN is a full-featured SSL VPN (virtual private network). It implements OSI layer 2 or 3 secure network extension using the SSL/TLS protocol. It is an open source software and distributed under the GNU GPL. A VPN allows you to connect securely to an insecure public network such as wifi network at the airport or hotel. VPN is also required to access your corporate or enterprise or home server resources. You can bypass geo-blocked site and increase your privacy or safety online. This tutorial provides step-by-step instructions for configuring an OpenVPN “road warrior” server on Ubuntu Linux 18.04/20.04 LTS (20.10) version including ufw/iptables firewall configuration. The steps are as follows:
+
+nixCraft: Privacy First, Reader Supported
+nixCraft is a one-person operation. I create all the content myself, with no help from AI or ML. I keep the content accurate and up-to-date.
+Your privacy is my top priority. I don’t track you, show you ads, or spam you with emails. Just pure content in the true spirit of Linux and FLOSS.
+Fast and clean browsing experience. nixCraft is designed to be fast and easy to use. You won’t have to deal with pop-ups, ads, cookie banners, or other distractions.
+Support independent content creators. nixCraft is a labor of love, and it’s only possible thanks to the support of our readers. If you enjoy the content, please support us on Patreon or share this page on social media or your blog. Every bit helps.
+Join Patreon ➔
+Find and note down your public IP address
+Download openvpn-install.sh script
+Run openvpn-install.sh to install OpenVPN server
+Connect an OpenVPN server using iOS/Android/Linux/Windows client
+Verify your connectivity
+NOTE: You need at least Ubuntu Linux 18.04 LTS or higher is needed to complete this tutorial. Older Ubuntu versions such as 14.04/16.04 LTS are no longer supported.
+
+Find your public IP address
+Tutorial details
+Difficulty level	Easy
+Root privileges	Yes
+Requirements	Linux terminal
+Category	OpenVPN
+Prerequisites	Ubuntu Linux
+OS compatibility	Debian • Linux • Ubuntu
+Est. reading time	5 minutes
+Use any one of the following command to find out your IPv4 public address. If your internface name is eth0 or eth1, enter:
+ip addr show eth0
+
+OR
+ip addr show eth1
+
+Or use the host command or dig command as follows:
+host myip.opendns.com resolver1.opendns.com
+## get IPv4 ##
+host -4 myip.opendns.com resolver1.opendns.com
+
+OR
+dig TXT +short o-o.myaddr.l.google.com @ns1.google.com
+## see IPv4 instead of default IPv6 ##
+dig -4 TXT +short o-o.myaddr.l.google.com @ns1.google.com
+
+Fig.01: Find out your public IPv4 address using the CLI
+Fig.01: Find out your public IPv4 address using the CLI
+
+Note down the public IPv4 address 172.105.102.90 (or IPv6 2600:3c04::f03c:92ff:fe42:3d72) i.e. public ip address of your OpenVPN server powered by Ubuntu Linux.
+Download openvpn-install.sh script to set up OpenVPN server in 5 minutes on Ubuntu
+Type the following wget command or curl command:
+wget https://git.io/vpn -O openvpn-install.sh
+
+wget grabbing the script:
+
+--2020-12-09 09:15:57--  https://git.io/vpn
+Resolving git.io (git.io)... 34.195.187.253, 52.87.143.234, 34.205.238.171, ...
+Connecting to git.io (git.io)|34.195.187.253|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://raw.github.com/Nyr/openvpn-install/master/openvpn-install.sh [following]
+--2020-12-09 09:15:57--  https://raw.github.com/Nyr/openvpn-install/master/openvpn-install.sh
+Resolving raw.github.com (raw.github.com)... 151.101.124.133
+Connecting to raw.github.com (raw.github.com)|151.101.124.133|:443... connected.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: https://raw.githubusercontent.com/Nyr/openvpn-install/master/openvpn-install.sh [following]
+--2020-12-09 09:15:57--  https://raw.githubusercontent.com/Nyr/openvpn-install/master/openvpn-install.sh
+Resolving raw.githubusercontent.com (raw.githubusercontent.com)... 151.101.124.133
+Connecting to raw.githubusercontent.com (raw.githubusercontent.com)|151.101.124.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 23079 (23K) 
+Saving to: 'openvpn-install.sh'
+
+openvpn-install.sh  100%[==================>]  22.54K  --.-KB/s    in 0.001s  
+
+2020-12-09 09:15:57 (36.9 MB/s) - 'openvpn-install.sh saved [23079/23079]
+
+We can verify script using a text editor such as nano command or vim command:
+nano openvpn-install.sh
+
+Running openvpn-install.sh to install OpenVPN server
+Type the following command:
+sudo chmod +x openvpn-install.sh
+sudo bash openvpn-install.sh
+
+Make sure you provide needed information:
+
+Welcome to this OpenVPN road warrior installer!
+
+Which protocol should OpenVPN use?
+   1) UDP (recommended)
+   2) TCP
+Protocol [1]: 1
+
+What port should OpenVPN listen to?
+Port [1194]: 
+
+Select a DNS server for the clients:
+   1) Current system resolvers
+   2) Google
+   3) 1.1.1.1
+   4) OpenDNS
+   5) Quad9
+   6) AdGuard
+DNS server [1]: 2
+
+Enter a name for the first client:
+Name [client]: iphone
+
+OpenVPN installation is ready to begin.
+Press any key to continue...
+Once you press any key such as [Enter] key, you will see:
+
+writing new private key to '/etc/openvpn/server/easy-rsa/pki/easy-rsa-1768.FjG9Gr/tmp.vQL9q8'
+-----
+Using configuration from /etc/openvpn/server/easy-rsa/pki/easy-rsa-1768.FjG9Gr/tmp.FiauWW
+Check that the request matches the signature
+Signature ok
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'server'
+Certificate is to be certified until Dec  7 09:22:17 2030 GMT (3650 days)
+
+Write out database with 1 new entries
+Data Base Updated
+
+Using SSL: openssl OpenSSL 1.1.1f  31 Mar 2020
+Generating a RSA private key
+....................................+++++
+...................+++++
+writing new private key to '/etc/openvpn/server/easy-rsa/pki/easy-rsa-1843.4USwJm/tmp.lOecLW'
+-----
+Using configuration from /etc/openvpn/server/easy-rsa/pki/easy-rsa-1843.4USwJm/tmp.5j0n6q
+Check that the request matches the signature
+Signature ok
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'iphone'
+Certificate is to be certified until Dec  7 09:22:17 2030 GMT (3650 days)
+
+Write out database with 1 new entries
+Data Base Updated
+
+Using SSL: openssl OpenSSL 1.1.1f  31 Mar 2020
+Using configuration from /etc/openvpn/server/easy-rsa/pki/easy-rsa-1899.k6zZtP/tmp.riZi2R
+
+An updated CRL has been created.
+CRL file: /etc/openvpn/server/easy-rsa/pki/crl.pem
+
+
+Created symlink /etc/systemd/system/multi-user.target.wants/openvpn-iptables.service → /etc/systemd/system/openvpn-iptables.service.
+Created symlink /etc/systemd/system/multi-user.target.wants/openvpn-server@server.service → /lib/systemd/system/openvpn-server@.service.
+
+Finished!
+
+The client configuration is available in: /root/iphone.ovpn
+New clients can be added by running this script again.
+
+Viewing and Seting up OpenVPN Server In 5 Minutes on Ubuntu Firewall Rules
+That is all. Your OpenVPN server has been configured and ready to use. You can see added firewall rules /etc/systemd/system/openvpn-iptables.service file:
+sudo systemctl cat openvpn-iptables.service
+
+Sample rules. Please do not edit them:
+
+[Unit]
+Before=network.target
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to 172.105.102.90
+ExecStart=/usr/sbin/iptables -I INPUT -p udp --dport 1194 -j ACCEPT
+ExecStart=/usr/sbin/iptables -I FORWARD -s 10.8.0.0/24 -j ACCEPT
+ExecStart=/usr/sbin/iptables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+ExecStop=/usr/sbin/iptables -t nat -D POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to 172.105.102.90
+ExecStop=/usr/sbin/iptables -D INPUT -p udp --dport 1194 -j ACCEPT
+ExecStop=/usr/sbin/iptables -D FORWARD -s 10.8.0.0/24 -j ACCEPT
+ExecStop=/usr/sbin/iptables -D FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+ExecStart=/usr/sbin/ip6tables -t nat -A POSTROUTING -s fddd:1194:1194:1194::/64 ! -d fddd:1194:1194:1194::/64 -j SNAT --to 2600:3c04::f03c:92ff:fe42:3d72
+ExecStart=/usr/sbin/ip6tables -I FORWARD -s fddd:1194:1194:1194::/64 -j ACCEPT
+ExecStart=/usr/sbin/ip6tables -I FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+ExecStop=/usr/sbin/ip6tables -t nat -D POSTROUTING -s fddd:1194:1194:1194::/64 ! -d fddd:1194:1194:1194::/64 -j SNAT --to 2600:3c04::f03c:92ff:fe42:3d72
+ExecStop=/usr/sbin/ip6tables -D FORWARD -s fddd:1194:1194:1194::/64 -j ACCEPT
+ExecStop=/usr/sbin/ip6tables -D FORWARD -m state --state RELATED,ESTABLISHED -j ACCEPT
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target
+You can view your openvpn server config file generated by the script as follows (agin do not edit this file by hand as it will break things for you):
+sudo more /etc/openvpn/server/server.conf
+
+Sample openvpn config:
+
+local 172.105.102.90
+port 1194
+proto udp
+dev tun
+ca ca.crt
+cert server.crt
+key server.key
+dh dh.pem
+auth SHA512
+tls-crypt tc.key
+topology subnet
+server 10.8.0.0 255.255.255.0
+server-ipv6 fddd:1194:1194:1194::/64
+push "redirect-gateway def1 ipv6 bypass-dhcp"
+ifconfig-pool-persist ipp.txt
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
+keepalive 10 120
+cipher AES-256-CBC
+user nobody
+group nogroup
+persist-key
+persist-tun
+status openvpn-status.log
+verb 3
+crl-verify crl.pem
+explicit-exit-notify
+How do I start/stop/restart OpenVPN server on Ubuntu Linux 18.04/20.04 LTS and 20.10?
+Run the following systemctl command to stop the OpenVPN service:
+sudo systemctl stop openvpn-server@server.service
+
+Want to start it again? Try:
+sudo systemctl start openvpn-server@server.service
+
+The command to restart the OpenVPN service:
+sudo systemctl restart openvpn-server@server.service
+
+View status of your OpenVPN systemd based service:
+sudo systemctl status openvpn-server@server.service
+
+● openvpn-server@server.service - OpenVPN service for server
+     Loaded: loaded (/lib/systemd/system/openvpn-server@.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2020-12-09 09:22:18 UTC; 7min ago
+       Docs: man:openvpn(8)
+             https://community.openvpn.net/openvpn/wiki/Openvpn24ManPage
+             https://community.openvpn.net/openvpn/wiki/HOWTO
+   Main PID: 2017 (openvpn)
+     Status: "Initialization Sequence Completed"
+      Tasks: 1 (limit: 4610)
+     Memory: 1.2M
+     CGroup: /system.slice/system-openvpn\x2dserver.slice/openvpn-server@server.service
+             └─2017 /usr/sbin/openvpn --status /run/openvpn-server/status-server.log --status-version 2 --suppress-timestamps --config server.conf
+
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: Socket Buffers: R=[212992->212992] S=[212992->212992]
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: UDPv4 link local (bound): [AF_INET]172.105.102.90:1194
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: UDPv4 link remote: [AF_UNSPEC]
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: GID set to nogroup
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: UID set to nobody
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: MULTI: multi_init called, r=256 v=256
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: IFCONFIG POOL IPv6: (IPv4) size=252, size_ipv6=65536, netbits=64, base_ipv6=fddd:1194:1194:1194::1000
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: IFCONFIG POOL: base=10.8.0.2 size=252, ipv6=1
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: IFCONFIG POOL LIST
+Dec 09 09:22:18 nixcraft-ubuntu-vm openvpn[2017]: Initialization Sequence Completed
+OpenVPN client configuration
+On server your will find a client configuration file called ~/iphone.ovpn (or whatever name given during installation). Use the find command to locate OpenVPN config file:
+sudo find / -type f -name "iphone.ovpn"
+sudo find / -type f -name "*.ovpn" -ls
+
+Now, all you have to do is copy this file to your local desktop using the scp and provide this file to your OpenVPN client to connect (replace iphone.ovpn and root username as per your set up):
+scp root@172.105.102.90:~/iphone.ovpn .
+
+If you cannnot run the scp command as root then log in as a normal user on your server. For example:
+ssh {user}@172.105.102.90
+ssh vivek@172.105.102.90
+
+Find the location of opvn file on the server:
+sudo find / -type f -name "*.ovpn" -ls
+
+34605854      4 -rw-r--r--   1 root     root         2774 May  6 01:04 /root/desktopclient.ovpn
+Then copy that file using the cp command in your home directory (say /home/vivek/ on the server itself):
+sudo cp /root/desktopclient.ovpn /home/vivek/
+
+Now type the scp from your desktop:
+scp vivek@172.105.102.90:/home/vivek/desktopclient.ovpn .
+
+Next, you need to download OpenVPN client as per your operating system or mobile device:
+
+Client for Apple iOS version 6.x or above
+Android client
+Apple MacOS (OS X)
+Windows 8/10 OpenVPN client
+macOS/OS X OpenVPN client configuration
+Just double click on iphone.ovpn file and it will open in your tunnelblick client > Click on the “Only me” to install it:
+Fig.03: MacOS / OS X openvpn client configuration
+Fig.03: MacOS / OS X openvpn client configuration
+
+Once installed click on Connect button and you will be online. Use the following command on MacOS client to verify that your public IP changed to the VPN server IP:
+dig TXT +short o-o.myaddr.l.google.com @ns1.google.com
+
+You can ping to OpenVPN server private IP using the ping command:
+ping 10.8.0.1
+Linux OpenVPN client configuration
+First, install the openvpn client, enter:
+sudo yum install openvpn
+
+OR
+sudo apt install openvpn
+
+Next, copy iphone.ovpn as follows:
+sudo cp iphone.ovpn /etc/openvpn/client.conf
+
+Test connectivity from the CLI:
+sudo openvpn --client --config /etc/openvpn/client.conf
+
+Your Linux system will automatically connect when computer restart using /etc/init.d/openvpn script:
+sudo /etc/init.d/openvpn start
+
+For systemd based system, use the following command:
+sudo systemctl start openvpn@client
+
+Test the OpenVPN connectivity on Linux desktop:
+ping 10.8.0.1 #Ping to OpenVPN server gateway using the ping command
+ip route #Make sure routing setup using the ip command ip route get 10.8.0.1
+#Make sure your public IP set to OpenVPN server
+dig TXT +short o-o.myaddr.l.google.com @ns1.google.com
+
+Set up and Verify OpenVPN Server In 5 Minutes on Ubuntu Linux
+FreeBSD OpenVPN client configuration
+First, install the openvpn client using the pkg command:
+sudo pkg install openvpn
+
+Next, copy iphone.ovpn as follows:
+mkdir -p /usr/local/etc/openvpn/
+sudo cp iphone.ovpn /usr/local/etc/openvpn/client.conf
+
+Edit /etc/rc.conf and add the following:
+
+openvpn_enable="YES"
+openvpn_configfile="/usr/local/etc/openvpn/client.conf"
+Start the OpenVPN service:
+sudo /usr/local/etc/rc.d/openvpn start
+
+Verify it:
+#Ping to OpenVPN server gateway from BSD
+ping 10.8.0.1
+#Make sure routing setup
+netstat -nr
+#Make sure your public IP set to OpenVPN server
+dig +short myip.opendns.com @resolver1.opendns.com
+
+How do I add a new client?
+For demo purpose I added a new device called googlephone. Let us add one more device called googlephone by running the script again:
+sudo bash openvpn-install.sh
+
+Looks like OpenVPN is already installed
+
+What do you want to do?
+   1) Add a cert for a new user
+   2) Revoke existing user cert
+   3) Remove OpenVPN
+   4) Exit
+Select an option [1-4]: 
+Select option 1 and type googlephone as a client name:
+
+Tell me a name for the client cert
+Please, use one word only, no special characters
+Client name: googlephone
+Generating a 2048 bit RSA private key
+.........+++
+.................................................................................................+++
+writing new private key to '/etc/openvpn/easy-rsa/pki/private/googlephone.key.FNaDMaP56c'
+-----
+Using configuration from /etc/openvpn/easy-rsa/openssl-1.0.cnf
+Check that the request matches the signature
+Signature ok
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'googlephone'
+Certificate is to be certified until Sep 25 07:31:46 2027 GMT (3650 days)
+ 
+Write out database with 1 new entries
+Data Base Updated
+ 
+Client googlephone added, certs available at ~/googlephone.ovpn
+Now you can use googlephone.ovpn with Google Android phone. You can add as many users you want using this method.
+
+How do I delete/revoke existing user certificate?
+Run the script:
+sudo bash openvpn-install.sh
+
+Here is how it looks:
+
+Looks like OpenVPN is already installed
+
+What do you want to do?
+   1) Add a cert for a new user
+   2) Revoke existing user cert
+   3) Remove OpenVPN
+   4) Exit
+Select an option [1-4]: 
+Type 2 option and you will see a list of all the existing client certificate you want to revoke:
+
+Select the existing client certificate you want to revoke
+     1) iphone6
+     2) googlephone
+     3) delllaptop
+     4) macbook
+Select one client [1-4]: 2
+Sample outputs when I revoked googlephone certificate:
+
+Using configuration from /etc/openvpn/easy-rsa/openssl-1.0.cnf
+Revoking Certificate 09.
+Data Base Updated
+Using configuration from /etc/openvpn/easy-rsa/openssl-1.0.cnf
+
+An updated CRL has been created.
+CRL file: /etc/openvpn/easy-rsa/pki/crl.pem
+
+
+Certificate for client googlephone revoked
+Conclusion
+And there you have it, OpenVPN server installed in five minutes to increase your privacy. Please see OpenVPN project and road warrior installer Linux script. Let us know if you have any problems or comments in the comments section below.
+
+This entry is 1 of 13 in the OpenVPN Tutorial series. Keep reading the rest of the series:
+How To Setup OpenVPN Server In 5 Minutes on Ubuntu Server
+Install Pi-hole with an OpenVPN to block ads
+Update/upgrade Pi-hole with an OpenVPN
+OpenVPN server on Debian 9/8
+Import a OpenVPN .ovpn file with Network Manager
+Ubuntu 18.04 LTS Set Up OpenVPN Server In 5 Minutes
+CentOS 7 Set Up OpenVPN Server In 5 Minutes
+Pi-Hole and Cloudflare DoH config
+Debian 10 Set Up OpenVPN Server In 5 Minutes
+CentOS 8 OpenVPN server in 5 mintues
+Ubuntu 20.04 LTS OpenVPN server in 5 mintues
+Debian 11 set up OpenVPN server in 5 mintues
+Ubuntu 22.04 LTS Set Up OpenVPN Server In 5 Minutes
+Did you notice? 🧐
+nixCraft is ad-free to protect your privacy and security. We rely on reader support to keep the site running. Please consider subscribing to us on Patreon or supporting us with a one-time support through PayPal or purchase official merchandise. Your support will help us cover the costs of hosting, CDN, DNS, and tutorial creation.
+
+Patreon ➔
+  
+PayPal ➔
+  
+Shop ➔
+About the author: Vivek Gite is the founder of nixCraft, the oldest running blog about Linux and open source. He wrote more than 7k+ posts and helped numerous readers to master IT topics. Join the nixCraft community via RSS Feed or Email Newsletter.
+
+🥺 Was this helpful? Please add a comment to show your appreciation or feedback.
+
+🔎 To search, type & hit enter...
+
+Related Tutorials
+Ubuntu 18.04 LTS Set Up OpenVPN Server In 5 MinutesUbuntu 18.04 LTS Set Up OpenVPN Server In 5 Minutes
+Ubuntu 20.04 LTS Set Up OpenVPN Server In 5 MinutesUbuntu 20.04 LTS Set Up OpenVPN Server In 5 Minutes
+Ubuntu 22.04 LTS Set Up OpenVPN Server In 5 MinutesUbuntu 22.04 LTS Set Up OpenVPN Server In 5 Minutes
+CentOS 7 Set Up OpenVPN Server In 5 MinutesCentOS 7 Set Up OpenVPN Server In 5 Minutes
+Debian 10 Set Up OpenVPN Server In 5 MinutesDebian 10 Set Up OpenVPN Server In 5 Minutes
+CentOS 8 Set Up OpenVPN Server In 5 MinutesCentOS 8 Set Up OpenVPN Server In 5 Minutes
+Debian 11 Set Up OpenVPN Server In 5 MinutesDebian 11 Set Up OpenVPN Server In 5 Minutes
+105 comments… add one
+MacTom Jun 27, 2016 @ 13:28
+5 minutes? It takes more time for sure. Where are keys.
+
+↩ ∞
+Alexander Alekseev Jun 27, 2016 @ 14:02
+Doesn’t look like 5 minutes to me and in fact it’s much, much simpler. Here is my cheat sheet (in Russian) http://eax.me/openvpn/ – this way it actually takes 5 minutes, I’ve checked many times.
+
+↩ ∞
+Raju T Jun 27, 2016 @ 18:10
+Can we see a CentOS 7 version of this tutorial?
+Cheers.
+
+↩ ∞
+Matteo Trentin Jun 27, 2016 @ 21:23
+And… how to temporarily suspend a client?
+no easy guide outsider there.
+thx
+
+↩ ∞
+jesusguevarautomotriz Jun 28, 2016 @ 3:33
+Hey, what a great article you’ve written, has long sought something like this, I have many articles and information gathered on the subject of Open VPN for when it is their time to implement exactly what you suggest in this article, that just what I need, nothing more.
+
+The option to download the article in pdf format of this blog is superior and much needed, although I use Pocket to store many items is very comfortable to save it to disk in a nicely formatted pdf.
+
+Can you make the option “Download to PDF” print the comments and related posts? your blog provides highly valuable information and deserves this option.
+
+A fan, Thanks.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jun 28, 2016 @ 10:49
+Thanks for the feedback. It required too much programming or changes to include the comments and related post in pdf file. I can’t promise anything but I will look into it when I’ve some free time.
+
+↩ ∞
+Ben Gillam Jun 28, 2016 @ 8:38
+Nice guide, how about adding users as this only shows the one user during setup
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jun 28, 2016 @ 10:47
+I will add it soon. Thanks for the feedback.
+
+↩ ∞
+Tony Sep 26, 2017 @ 14:17
+Hello Vivek,
+
+Please can you add a guide of how to add users/clients
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Sep 27, 2017 @ 7:39
+I updated info about adding a new client and deleting existing one. HTH
+
+↩ ∞
+jesusguevarautomotriz Jul 4, 2016 @ 7:20
+First a brief note:
+sudo openvpn-install.sh I not work for me
+Openvpn-install.sh bash had to do to make it work.
+
+Hi, I’m trying to do this in a Lubuntu 14.04 LTS 2007 MacBook Laptop connected to a WiFi network, is this possible? I know you specify that is a Ubuntu Server.
+
+The script ran successfully, but the first step in where he had to enter the IP address, showed the local network address 192.168.0.25 and change it to the public IP address that showed me the command: dig + short myip \. opendns.com @ resolver1.opendns.com
+
+When I try to connect another Asus Linux Client Lubuntu 14.04, I note that your public IP address Unchanging remains in
+
+Here is some of the output produced by my client:
+Mon 4 July 2016 3:10:25 SIGUSR1 [soft, tls-error] received, process restarting
+Mon 4 July 2016 3:10:25 Restart pause, 2 second (s)
+Mon 4 July 2016 3:10:27 Socket Buffers: R = [212992-> 212992] S = [212992-> 212992]
+3:10:27 Mon 4 July 2016 Local UDPv4 link: [undef]
+Mon 4 July 2016 3:10:27 UDPv4 link remote: [AF_INET] 82.250.240.108:1194
+3:11:27 Mon 4 July 2016 TLS Error: TLS key negotiation failed to Occur Within 60 seconds (check your network connectivity)
+3:11:27 Mon 4 July 2016 TLS Error: TLS handshake failed
+Mon 4 July 2016 3:11:27 SIGUSR1 [soft, tls-error] received, process restarting
+Mon 4 July 2016 3:11:27 Restart pause, 2 second (s)
+Mon 4 July 2016 3:11:29 Socket Buffers: R = [212992-> 212992] S = [212992-> 212992]
+3:11:29 Mon 4 July 2016 Local UDPv4 link: [undef]
+Mon 4 July 2016 3:11:29 UDPv4 link remote: [AF_INET] 82.250.240.108:1194
+3:12:29 Mon 4 July 2016 TLS Error: TLS key negotiation failed to Occur Within 60 seconds (check your network connectivity)
+3:12:29 Mon 4 July 2016 TLS Error: TLS handshake failed
+Mon 4 July 2016 3:12:29 SIGUSR1 [soft, tls-error] received, process restarting
+Mon 4 July 2016 3:12:29 Restart pause, 2 second (s)
+Mon 4 July 2016 3:12:31 Socket Buffers: R = [212992-> 212992] S = [212992-> 212992]
+3:12:31 Mon 4 July 2016 Local UDPv4 link: [undef]
+Mon 4 July 2016 3:12:31 UDPv4 link remote: [AF_INET] 82.250.240.108:1194
+
+My goal is to assemble an experimental home domestic vpn, web traffic to route and connect via ssh as if it were a LAN network to Backups or systems management work.
+Thanks greetings.
+
+↩ ∞
+jesusguevarautomotriz Jul 4, 2016 @ 15:42
+Sorry for the hasty and mistranslation, at the beginning I meant:
+
+First a brief note:
+$ sudo openvpn-install.sh I not work for me
+$ bash openvpn-install.sh had to do to make it work
+
+↩ ∞
+jesusguevarautomotriz Jul 4, 2016 @ 23:55
++----------------+
+  (public IP)        |                      |
+  {INTERNET}={ Router          |
+                            |                      |
+                            |                       |
+                           +------+---------+
+                                      | (192.168.0.1)
+                                      |
+                                      |   +------------------+
+                                      |   |                        |
+                                      |   |  OpenVPN    |  wlan0: 192.168.0.10/24
+                                     +--{wlan0 server |  tun0: 10.8.0.1/24
+                                      I   |                        |
+                                      |   | {tun0}             |
+                                      I  +--------+---------+
+                                      |
+                  +------------+-----------+
+                  |                                  |
+                  |  Other LAN clients |
+                  |                                  |
+                  |   192.168.0.0/24    |
+                  |      (internal net)     |
+                +---------------------------+
+↩ ∞
+jesusguevarautomotriz Jul 4, 2016 @ 23:56
+ASCII Diagram Fail
+See Using routing and OpenVPN not running on the default gateway
+https://community.openvpn.net/openvpn/wiki/BridgingAndRouting
+
+↩ ∞
+geeknik Jul 24, 2016 @ 7:57
+AES-128? Replace that with AES-256.
+
+↩ ∞
+john Sep 5, 2016 @ 9:35
+hi. amazing tutorial. it took me less than 5 minutes in my server (192.168.1.1/24). now all remote clients(10.8.0.0/24) can easily access the server. i would like to have all the remote clients to be able to see the rest of the LAN where the server is (192.168.1.0/24). The server is ubuntu
+
+↩ ∞
+justin Sep 17, 2016 @ 3:31
+I’m working on trying to configure that same setup now. From what I understand is you need to bridge the two networks under one subnet. Still not sure how to do that.
+
+↩ ∞
+Achal Nov 22, 2016 @ 11:04
+can you please also help me to resolve this issue? my scenario is like:
+
+Public IP of VPN server: xxx.xxx.xxx.xxx
+LAN IP of VPN server: 10.0.0.XXX
+Clients are getting IP: 10.8.0.XXX
+
+I want my client to connect all LAN network.
+
+all help is appreciated in advance
+
+↩ ∞
+Christopher Apr 5, 2017 @ 4:20
+has anyone resolved this problem yet?
+
+↩ ∞
+Ingo Sep 22, 2016 @ 10:08
+Excellent Tutorial – Thanks !!!
+
+↩ ∞
+Mohamed Oct 6, 2016 @ 13:30
+this tutorial does not worked for me: the following is the log of my openvpn client:
+
+Thu Oct 06 15:26:41 2016 OpenVPN 2.3.12 x86_64-w64-mingw32 [SSL (OpenSSL)] [LZO] [PKCS11] [IPv6] built on Oct  3 2016
+Thu Oct 06 15:26:41 2016 Windows version 6.2 (Windows 8 or greater) 64bit
+Thu Oct 06 15:26:41 2016 library versions: OpenSSL 1.0.1u  22 Sep 2016, LZO 2.09
+Enter Management Password:
+Thu Oct 06 15:26:41 2016 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:25341
+Thu Oct 06 15:26:41 2016 Need hold release from management interface, waiting...
+Thu Oct 06 15:26:41 2016 MANAGEMENT: Client connected from [AF_INET]127.0.0.1:25341
+Thu Oct 06 15:26:41 2016 MANAGEMENT: CMD 'state on'
+Thu Oct 06 15:26:41 2016 MANAGEMENT: CMD 'log all on'
+Thu Oct 06 15:26:41 2016 MANAGEMENT: CMD 'hold off'
+Thu Oct 06 15:26:41 2016 MANAGEMENT: CMD 'hold release'
+Thu Oct 06 15:26:41 2016 Control Channel Authentication: tls-auth using INLINE static key file
+Thu Oct 06 15:26:41 2016 Outgoing Control Channel Authentication: Using 160 bit message hash 'SHA1' for HMAC authentication
+Thu Oct 06 15:26:41 2016 Incoming Control Channel Authentication: Using 160 bit message hash 'SHA1' for HMAC authentication
+Thu Oct 06 15:26:41 2016 Socket Buffers: R=[65536->65536] S=[65536->65536]
+Thu Oct 06 15:26:41 2016 UDPv4 link local: [undef]
+Thu Oct 06 15:26:41 2016 UDPv4 link remote: [AF_INET]52.59.243.92:1194
+Thu Oct 06 15:26:41 2016 MANAGEMENT: >STATE:1475760401,WAIT,,,
+Thu Oct 06 15:27:41 2016 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+Thu Oct 06 15:27:41 2016 TLS Error: TLS handshake failed
+Thu Oct 06 15:27:41 2016 SIGUSR1[soft,tls-error] received, process restarting
+Thu Oct 06 15:27:41 2016 MANAGEMENT: >STATE:1475760461,RECONNECTING,tls-error,,
+Thu Oct 06 15:27:41 2016 Restart pause, 2 second(s)
+Thu Oct 06 15:27:43 2016 Socket Buffers: R=[65536->65536] S=[65536->65536]
+Thu Oct 06 15:27:43 2016 UDPv4 link local: [undef]
+Thu Oct 06 15:27:43 2016 UDPv4 link remote: [AF_INET]52.59.243.92:1194
+Thu Oct 06 15:27:43 2016 MANAGEMENT: >STATE:1475760463,WAIT,,,
+Thu Oct 06 15:28:43 2016 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+Thu Oct 06 15:28:43 2016 TLS Error: TLS handshake failed
+Thu Oct 06 15:28:43 2016 SIGUSR1[soft,tls-error] received, process restarting
+Thu Oct 06 15:28:43 2016 MANAGEMENT: >STATE:1475760523,RECONNECTING,tls-error,,
+Thu Oct 06 15:28:43 2016 Restart pause, 2 second(s)
+Thu Oct 06 15:28:45 2016 Socket Buffers: R=[65536->65536] S=[65536->65536]
+Thu Oct 06 15:28:45 2016 UDPv4 link local: [undef]
+Thu Oct 06 15:28:45 2016 UDPv4 link remote: [AF_INET]52.59.243.92:1194
+Thu Oct 06 15:28:45 2016 MANAGEMENT: >STATE:1475760525,WAIT,,,
+Thu Oct 06 15:28:47 2016 SIGTERM[hard,] received, process exiting
+Thu Oct 06 15:28:47 2016 MANAGEMENT: >STATE:1475760527,EXITING,SIGTERM,,
+could you assist me to resolve the problem?
+
+↩ ∞
+Anonymous Aug 8, 2022 @ 14:01
+You have to open firewall on the server side to allow incoming traffic (UDP on port 1194). If is a machine on AWS, open the security group.
+
+↩ ∞
+YipengXiao Oct 9, 2016 @ 2:24
+I use ubuntu16.04
+I failed start openvpen
+This is error detail:
+daemon() failed or unsupported: Resource temporarily unavailable (errno=11)
+
+↩ ∞
+Drew Oct 18, 2016 @ 6:26
+Thank you for the tutorial. That script it pretty awesome.
+
+I’m running into an issue though. Under the client configuration part I don’t seem to have the .ovpn file that I am supposed to copy to the client machine. Where did I go wrong? Any tips or assistance would be greatly appreciate.
+
+↩ ∞
+drake Oct 23, 2016 @ 15:02
+Wouldn’t use this script or guide guys. Sets up a hidden account on your server that you install openvpn on. Right after i set it up I got three logins from india. Even the IP he lists in the tutorial is India based. Just a heads up I wouldn’t use this.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Oct 23, 2016 @ 17:50
+The script is open source. There is no hidden account created on your server. You are just making claim out of /dev/null.
+
+↩ ∞
+feri Nov 18, 2016 @ 1:53
+The script worked great.
+Before that I tried it manually, but did not get the IPTABLES to work.
+Thank you very much!
+
+↩ ∞
+jasson Nov 22, 2016 @ 21:00
+how to add user autentication
+
+↩ ∞
+Francesco Nov 25, 2016 @ 12:48
+It works perfectly, thank you!!!!
+
+↩ ∞
+mason Jan 23, 2017 @ 12:32
+Wow, not a tutorial (I like to understand what’s happening) but I was up and running in 5 minutes on my testserver. Thanks a lot!
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jan 23, 2017 @ 17:19
+Hah. Yes. You can read the script to understand what’s happening. Just use a text editor.
+
+↩ ∞
+mason Feb 2, 2017 @ 7:54
+of course, I know and i did, to learn something and to see if there are no malicious parts (trust no one ;))
+
+↩ ∞
+ExMM Feb 1, 2017 @ 9:15
+Excellent tutorial, really useful everything working perfectly fine for me.
+
+Only one question, now I have access to my entire LAN with OpenVPN also to my router, which I would like to block for the client that will connect to my home server.
+How can I block internal LAN static IP Addresses?
+
+Thanks a lot again!
+
+↩ ∞
+Moep Feb 2, 2017 @ 11:28
+Hi @all,
+
+you wan it in 5 min with routing and a good gui.
+
+Look at http://pritunl.com/
+
+you can use your standard openvpn client.
+
+Moep
+
+↩ ∞
+xav Feb 19, 2017 @ 15:23
+Thanks for this script!
+
+↩ ∞
+empyre Mar 4, 2017 @ 22:47
+Sat Mar 04 16:32:50 2017 OpenVPN 2.4.0 x86_64-w64-mingw32 [SSL (OpenSSL)] [LZO] [LZ4] [PKCS11] [AEAD] built on Jan 31 2017
+Sat Mar 04 16:32:50 2017 Windows version 6.2 (Windows 8 or greater) 64bit
+Sat Mar 04 16:32:50 2017 library versions: OpenSSL 1.0.2k  26 Jan 2017, LZO 2.09
+Enter Management Password:
+Sat Mar 04 16:32:50 2017 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:25340
+Sat Mar 04 16:32:50 2017 Need hold release from management interface, waiting...
+Sat Mar 04 16:32:51 2017 MANAGEMENT: Client connected from [AF_INET]127.0.0.1:25340
+Sat Mar 04 16:32:51 2017 MANAGEMENT: CMD 'state on'
+Sat Mar 04 16:32:51 2017 MANAGEMENT: CMD 'log all on'
+Sat Mar 04 16:32:51 2017 MANAGEMENT: CMD 'hold off'
+Sat Mar 04 16:32:51 2017 MANAGEMENT: CMD 'hold release'
+Sat Mar 04 16:32:51 2017 Outgoing Control Channel Authentication: Using 160 bit message hash 'SHA1' for HMAC authentication
+Sat Mar 04 16:32:51 2017 Incoming Control Channel Authentication: Using 160 bit message hash 'SHA1' for HMAC authentication
+Sat Mar 04 16:32:51 2017 TCP/UDP: Preserving recently used remote address: [AF_INET]10.16.10.14:1194
+Sat Mar 04 16:32:51 2017 Socket Buffers: R=[65536->65536] S=[64512->64512]
+Sat Mar 04 16:32:51 2017 UDP link local: (not bound)
+Sat Mar 04 16:32:51 2017 UDP link remote: [AF_INET]10.16.10.14:1194
+Sat Mar 04 16:32:51 2017 MANAGEMENT: >STATE:1488666771,WAIT,,,,,,
+Sat Mar 04 16:33:51 2017 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+Sat Mar 04 16:33:51 2017 TLS Error: TLS handshake failed
+Sat Mar 04 16:33:51 2017 SIGUSR1[soft,tls-error] received, process restarting
+Sat Mar 04 16:33:51 2017 MANAGEMENT: >STATE:1488666831,RECONNECTING,tls-error,,,,,
+Sat Mar 04 16:33:51 2017 Restart pause, 5 second(s)
+Sat Mar 04 16:33:56 2017 TCP/UDP: Preserving recently used remote address: [AF_INET]10.16.10.14:1194
+Sat Mar 04 16:33:56 2017 Socket Buffers: R=[65536->65536] S=[64512->64512]
+Sat Mar 04 16:33:56 2017 UDP link local: (not bound)
+Sat Mar 04 16:33:56 2017 UDP link remote: [AF_INET]10.16.10.14:1194
+Sat Mar 04 16:33:56 2017 MANAGEMENT: >STATE:1488666836,WAIT,,,,,,
+Can anyone help me out
+
+↩ ∞
+p3g Mar 29, 2017 @ 19:16
+Hey, I just setup this with my DigitalOcean VPS server. As Vivek said, it took me exactly five minutes. Thanks boss.
+
+↩ ∞
+Raul Apr 25, 2017 @ 18:47
+Hi, how to add password for client?
+
+↩ ∞
+opavliuk Nov 17, 2020 @ 11:07
+Find a line of creating SSL certificate in the script and remove “nopass”:
+
+$ grep -n '"$client" nopass' openvpn-install.sh
+241:	EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-client-full "$client" nopass
+458:			EASYRSA_CERT_EXPIRE=3650 ./easyrsa build-client-full "$client" nopass
+↩ ∞
+Julien May 1, 2017 @ 3:04
+Thanks, it works!
+
+…But my client can’t see the samba shares on the openvpn server.
+
+And yes, samba is set as a wins server.
+
+Need help please.
+
+↩ ∞
+Nicholas May 11, 2017 @ 18:13
+Everything is up and running, all of your sample outputs match mine… Up to the point where I’ve moved the ovpn file to my desktop and opened it in Tunnelblick (mac osx), but it’s not connecting. It looks like I’m having the same error message as someone above that never got a response. Do you have any advice as to why the .ovpn file isn’t working to connect Tunnelblick?
+
+2017-05-11 12:06:18 OpenVPN 2.3.14 x86_64-apple-darwin [SSL (OpenSSL)] [LZO] [PKCS11] [MH] [IPv6] built on Jan 28 2017
+2017-05-11 12:06:18 library versions: OpenSSL 1.0.2k 26 Jan 2017, LZO 2.09
+2017-05-11 12:06:18 MANAGEMENT: TCP Socket listening on [AF_INET]127.0.0.1:1337
+2017-05-11 12:06:18 Need hold release from management interface, waiting…
+2017-05-11 12:06:18 MANAGEMENT: Client connected from [AF_INET]127.0.0.1:1337
+2017-05-11 12:06:18 *Tunnelblick: openvpnstart starting OpenVPN
+2017-05-11 12:06:18 *Tunnelblick: Established communication with OpenVPN
+2017-05-11 12:06:18 MANAGEMENT: CMD ‘pid’
+2017-05-11 12:06:18 MANAGEMENT: CMD ‘state on’
+2017-05-11 12:06:18 MANAGEMENT: CMD ‘state’
+2017-05-11 12:06:18 MANAGEMENT: CMD ‘bytecount 1’
+2017-05-11 12:06:18 MANAGEMENT: CMD ‘hold release’
+2017-05-11 12:06:18 NOTE: the current –script-security setting may allow this configuration to call user-defined scripts
+2017-05-11 12:06:18 Control Channel Authentication: tls-auth using INLINE static key file
+2017-05-11 12:06:18 Outgoing Control Channel Authentication: Using 160 bit message hash ‘SHA1’ for HMAC authentication
+2017-05-11 12:06:18 Incoming Control Channel Authentication: Using 160 bit message hash ‘SHA1’ for HMAC authentication
+2017-05-11 12:06:18 Socket Buffers: R=[196724->196724] S=[9216->9216]
+2017-05-11 12:06:18 UDPv4 link local: [undef]
+2017-05-11 12:06:18 UDPv4 link remote: [AF_INET]75.174.28.41:1194
+2017-05-11 12:06:18 MANAGEMENT: >STATE:1494525978,WAIT,,,
+2017-05-11 12:07:18 TLS Error: TLS key negotiation failed to occur within 60 seconds (check your network connectivity)
+2017-05-11 12:07:18 TLS Error: TLS handshake failed
+
+↩ ∞
+RAPTORMAN May 19, 2017 @ 4:05
+How many total clients are allowed with this script setup? Thanks in advance.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite May 19, 2017 @ 8:49
+There is no limit
+
+↩ ∞
+RAPTORMAN May 21, 2017 @ 14:13
+Script works great. Thanks for your hard work
+
+↩ ∞
+Mohsen Dehbashi Nov 12, 2022 @ 11:23
+How many clients per connection file? It seems to be unlimited as well. Because I can connect as many clients as I want with the same ovpn connection file.
+
+↩ ∞
+Neil Niekerk Jun 6, 2017 @ 20:40
+?
+
+neil@Lexington:/etc/openvpn$ dig TXT +short o-o.myaddr.l.google.com @ns1.google.com
+“104.3.156.194”
+mark@Lexington:/etc/openvpn$ sudo openvpn –client –config /etc/openvpn/client.conf
+Options error: In [CMD-LINE]:1: Error opening configuration file: /etc/openvpn/client.conf
+
+↩ ∞
+Chris Jun 17, 2017 @ 5:26
+Server is set up, nicely. Love It !!!
+I spent the past “month” trying to get any/all the online examples of “How to” to work, but always had problems. this is so very nobrainer on the “Server Side”, it’s GREAT !!!
+
+However,
+Client shows “Active (exited)” when I $ sudo /etc/init.d/openvpn status
+
+I can PING 10.8.0.1 from my client, though
+
+$ dig TXT +short o-o.myaddr.l.google.com @ns1.google.com
+
+just hangs, then times out.
+
+I open Firefox, and goto “GOOGLE.com”, it times out,
+“Server not found”.
+I’ve played with “proxy” and “no proxy” in Firefox. No change.
+
+How do I tell ALL my traffic is going via the “tunnel”?
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jun 17, 2017 @ 7:30
+Existed means something is wrong on your client.
+
+↩ ∞
+Chris Jun 18, 2017 @ 17:47
+That’s very true.
+So after rebuilding my laptop (client, due to ALL the changes I had previously made to it over the past months following other “How To’s”, so I had a “clean slate” so to speak), I came up with the same behavior (Hey, at least I’m consistent !!!). So with the help of “other How To’s”, I noted I could get to google.com by IP address, but not by name (On the Server, I did a “PING GOOGLE.COM, got the IP address and entered it in a “PING” on the client). Ah Ha !!! DNS problem. So SEARCHing online, I found a solution that “worked”.
+On the Client,
+https://ubuntuforums.org/showthread.php?t=2352821&page=2
+Edit ” /etc/resolvconf/resolv.conf.d/head ” and enter
+nameserver 8.8.8.8
+
+or whatever OpenDNS address you wish. I used
+nameserver 208.67.222.123
+nameserver 208.67.220.123
+
+which is all throughout the OpenVPN code I set up for myself on the Server and my home gateways. Then I REBOOTed, to enable it all. I then did a ” PING GOOGLE.COM ” and it worked. So I brought up my browser and “Voala”, Google came up on the browser. It worked !!! Now, There’s a warning in the file you edited about it being overwritten. By what, I’d like to know, so it can be permanent and not overwritten. More SEARCHing …
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jun 19, 2017 @ 11:05
+Check this “How To: Make Sure /etc/resolv.conf Never Get Updated By DHCP Client“. HTH
+
+↩ ∞
+Dustin Aug 8, 2017 @ 17:05
+I ran the script, and I can ping my servers local ip (192.168.1.227) but I cannot access the internet. I can’t connect to google by hostname or by just the ip
+
+↩ ∞
+Asad Aug 17, 2017 @ 19:15
+Hi,
+
+Just want to say thank you very much! Like many others I have spent days trying to do this through all the manual guides there are online but I would always screw up a step.
+
+This worked out the box minus the /etc/resolv.conf DNS entires not updating themselves.
+
+I added
+script-security 2
+up /etc/openvpn/update-resolv-conf
+down /etc/openvpn/update-resolv-conf
+
+to the client.ovpn file. This is a script that updates your DNS entry for you. you can find the script online.
+
+↩ ∞
+EP Sep 15, 2017 @ 20:58
+I’m wondering where the admin web UI address is?
+Its usually accessed via port 1143 or 5280 or 943 but none of those work.
+My openvpn is working just fine, but I cant access the admin console to control it.
+
+↩ ∞
+John Isaac Sep 26, 2017 @ 13:27
+Perfect and took less than 5 minutes , thanks for sharing .
+
+↩ ∞
+Tony Sep 26, 2017 @ 16:32
+anyone know how to create more clients
+thx
+
+↩ ∞
+ozgurk Oct 7, 2017 @ 14:12
+A-MA-ZING article! After a month-long researching and Google’ing all around, that was the only useful article on setting and configuring OpenVPN, in entire the Internet! Many thanks for this!
+Best.
+
+↩ ∞
+vishnu Nov 29, 2017 @ 11:32
+Hi, I have 3 .OVPN file and I want to connect them all simultaneously. please help how to connect.
+
+↩ ∞
+Rik Dec 13, 2017 @ 23:10
+Is there a way to add the openVPN webif GUI to change settings etc?
+
+Thanks for the great and simple guide got it running first time.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Dec 14, 2017 @ 6:08
+I don’t think so.
+
+↩ ∞
+Daniel Jacoby Dec 3, 2020 @ 12:09
+Outstanding script congrats!!!
+Ive a problem it seems that the openvpn service is trying to open
+the server.conf from the wrong folder
+journalctl -xe –> Options error: In [CMD-LINE]:1: Error opening configuration file: /etc/openvpn/server.conf
+
+it makes some sense because the folder structure is
+ls /etc/openvpn/
+client server
+
+and in /lib/systemd/system/openvpn@.service
+
+the line
+
+ExecStart=/usr/sbin/openvpn –daemon ovpn-%i –status /run/openvpn/%i.status 10 –cd /etc/openvpn –script-security 2 –config /etc/openvpn/%i.conf –writepid /run/openvpn/%i.pid
+
+shows: –config /etc/openvpn/%i.conf
+and it should be
+–config /etc/openvpn/server/%i.conf
+I guess
+Im new in this no experiencie at all what do you sugest to do
+Editing the service ??
+Thanks in advance!!
+Daniel
+
+↩ ∞
+Daniel Jacoby Dec 3, 2020 @ 12:38
+Update
+systemctl list-units
+openvpn-iptables.service loaded active exited openvpn-iptables.service
+openvpn-server@server.service loaded active running OpenVPN service for server
+openvpn.service loaded active exited OpenVPN service
+openvpn@server.service loaded activating auto-restart OpenVPN connection to server
+
+I dont understand what are the diferences between the last three
+
+↩ ∞
+Peter Young Dec 8, 2020 @ 16:13
+Can anyone help with this issue ?
+
+I have installed the server as above but am getting many errors in the log. It seems that 2 services have been defined and one fails every few seconds.
+
+Nov 11 16:11:28 vm8 systemd[1]: openvpn-server@...: Service hold-off time over, scheduling restart.
+Nov 11 16:11:28 vm8 systemd[1]: openvpn-server@...: Scheduled restart job, restart counter is at 4034009.
+Nov 11 16:11:28 vm8 systemd[1]: Stopped OpenVPN service for server.service.
+Nov 11 16:11:28 vm8 systemd[1]: Starting OpenVPN service for server.service...
+Nov 11 16:11:28 vm8 openvpn[11582]: Options error: In [CMD-LINE]:1: Error opening configuration file: server.service.conf
+Nov 11 16:11:28 vm8 openvpn[11582]: Use --help for more information.
+Nov 11 16:11:28 vm8 systemd[1]: openvpn-server@...: Main process exited, code=exited, status=1/FAILURE
+Nov 11 16:11:28 vm8 systemd[1]: openvpn-server@...: Failed with result 'exit-code'.
+Nov 11 16:11:28 vm8 systemd[1]: Failed to start OpenVPN service for server.service.
+Ubuntu 18.04.4 LTS
+openvpn candidate 2.4.4-2ubuntu1.3
+
+Any ideas how to fix this ?
+
+OpenVPN say its not a bug …
+https://community.openvpn.net/openvpn/ticket/1353
+
+↩ ∞
+Peter Young Dec 8, 2020 @ 16:17
+root@vm8:~# sudo systemctl|grep openvpn
+  openvpn-iptables.service                                                                  loaded active     exited       openvpn-iptables.service             
+  openvpn-server@server.service                                                             loaded active     running      OpenVPN service for server           
+  openvpn-server@server.service.service                                                     loaded activating auto-restart OpenVPN service for server.service   
+  openvpn.service                                                                           loaded active     exited       OpenVPN service                      
+  system-openvpn\x2dserver.slice                                                            loaded active     active       system-openvpn\x2dserver.slice
+↩ ∞
+Mario Jan 31, 2021 @ 0:10
+The script makes it easy to deploy a simple openvpn setup. However, it is difficult to setup a VPN gateway.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jan 31, 2021 @ 6:29
+Server is up and running. Just set up correct stuff and routing on your VPN router at office/home and it will act as a vpn gateway too.
+
+↩ ∞
+Francisco Feb 3, 2021 @ 16:05
+Well. Ubuntu 20.04 worked like a charm. I personally dont route internet traffic throu it, so I had to comment a few lines, and I added clien-to-client directive. Works like a charm!
+
+↩ ∞
+Andy Smith Feb 8, 2021 @ 19:55
+Any way of adding user authentication. If we use the app on an android device the file will import fine but it asks for a username and password to work.
+
+↩ ∞
+Andre Mar 29, 2021 @ 16:42
+I have install openvpn and it works.
+Now i will make a client as gateway for my lan.
+
+Can you help me?
+
+↩ ∞
+fateme Apr 24, 2021 @ 8:40
+hi
+
+thank you
+i installed it but now i want change dns.
+how can i change dns for client?
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Apr 25, 2021 @ 23:21
+You need to edit the openvpn server /etc/openvpn/server/server.conf file and change the following line:
+push "dhcp-option DNS 172.26.187.4"
+
+Then restart the OpenVPN service.
+
+↩ ∞
+Stefan May 14, 2021 @ 19:35
+IPv6 connection to server fails, while IP4v4 works seamless.
+Maybe the problem is, the script creates a server config that uses IPv4 (1such as “local 172.105.102.90”). How to allow connectoing to the server via IPv6 only or even better v4 + v6 ?
+
+↩ ∞
+Mariano Jun 22, 2021 @ 19:15
+Setup this script on my Google VM, openvpn running, however netstat does not show it as LISTEN.
+
+Why is this? I cannot connect, of course.
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jun 23, 2021 @ 9:38
+Run:
+
+sudo systemctl status openvpn-server@server.service
+sudo journalctl -xe -u openvpn
+↩ ∞
+Mariano Jul 1, 2021 @ 23:00
+Thank you Vivek! I will try this and let you know.
+
+Have a nice weekend!
+
+↩ ∞
+Ben Jul 5, 2021 @ 11:28
+When I have copied the .ovpn file to my client (windows machine) and import it into openvpn I get Error Message: static_key_parse_error
+
+Not really sure what I have done wrong
+
+↩ ∞
+HR Mar 27, 2022 @ 18:01
+how can I use for mikrotik ?
+mikrotik support without username and password?
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Mar 27, 2022 @ 20:13
+I don’t know. I do not use mikrotik product.
+
+↩ ∞
+Felix | D1strict Apr 17, 2022 @ 9:57
+Hello,
+
+I think this one is wrong:
+
+## get IPv4 ##
+$ host myip.opendns.com resolver1.opendns.com
+And should probably be as follows:
+
+## get IPv4 ##
+$ host -4 myip.opendns.com resolver1.opendns.com
+Greetings,
+Felix
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Apr 17, 2022 @ 11:43
+That is correct. Fixed it. Thank you!
+
+↩ ∞
+Philip Orleans May 29, 2022 @ 21:05
+I wonder if you could add an optional section to generate a password for the customer and a way to change it later. Suppose he forgets it.
+
+Philip
+
+↩ ∞
+Neto Aug 8, 2022 @ 14:02
+You have to open firewall on the server side to allow incoming traffic (UDP on port 1194). If is a machine on AWS, open the security group.
+
+↩ ∞
+Anonymous Oct 13, 2022 @ 23:12
+Beware;
+
+# Create the DH parameters file using the predefined ffdhe2048 group
+	echo '-----BEGIN DH PARAMETERS-----
+MIIBCAKCAQEA//////////+t+FRYortKmq/cViAnPTzx2LnFg84tNpWp4TZBFGQz
++8yTnc4kmz75fS/jY2MMddj2gbICrsRhetPfHtXV/WVhJDP1H18GbtCFY2VVPe0a
+87VXE15/V8k1mE8McODmi3fipona8+/och3xWKE2rec1MKzKT0g6eXq8CrGCsyT7
+YdEIqUuyyOP7uWrat2DX9GgdT0Kj3jlN9K5W7edjcrsZCwenyO4KbXCeAvzhzffi
+7MA0BM0oNC9hkXL+nOmFg/+OTxIy7vKBg8P+OxtMb61zO7X8vC7CIAXFjvGDfRaD
+ssbzSibBsu/6iGtCOGEoXJf//////////wIBAg==
+-----END DH PARAMETERS-----' > /etc/openvpn/server/dh.pem
+here, a given key is used and written to a file via “echo”…
+someone is definitely playing a funny game here.
+dont use!
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Oct 15, 2022 @ 4:05
+Predefined ffdhe2048 group are standard as per https://www.rfc-editor.org/rfc/rfc7919 .
+
+↩ ∞
+Ben Spradling Oct 15, 2022 @ 2:51
+ran script, completed successfully. To get to the .ovpn file I have to do
+sudo -i which logs me in as root and there it is but when I exit and return
+to user the file does not exist anywhere. How do I get it to put the .ovpn
+file in my home folder or somewhere accessible.
+OS ubuntu 20.04.4
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Oct 15, 2022 @ 3:57
+Use the find command to locate the file:
+
+sudo find / -iname "*.ovpn" -ls
+↩ ∞
+Paiman Oct 20, 2022 @ 7:31
+This is awesome, still using it after so many years. Thanks so much.
+
+↩ ∞
+Mohsen Dehbashi Nov 12, 2022 @ 11:27
+How can we monitor the connected clients? Like their ips and how many devices are or were connecting with the same connection file. Generally, do we have a monitoring service available with this? Or can we install one?
+
+↩ ∞
+Filippo Dec 10, 2022 @ 17:51
+Hi Vivek,
+
+thanks for the amazing script that saves us lots of work!
+I have set up a server following your instructions and it works well when I connect from different Android and Linux clients. However, I have tried to connect from two different Windows 10 machines (using the Openvpn-GUI client and the .ovpn file from my server) and I have no Internet connection. The client connects (green icon) and it gives me a 10.8.0.3 address but I cannot access the Internet or even ping the VPN server (10.8.0.1).
+
+On Windows, “ipconfig /all” shows that no gateway is present, which seems to be the problem. Plus, the Win client creates 3 virtual interfaces but the one that receives an IP is “OpenVpn Data Channel Offload” (instead of TAP-Windows Adapter V9 or OpenVPN Wintun) : is that ok?
+
+The server config, as per your setting, pushes “redirect-gateway def1 bypass-dhcp” to the client but no gateway is set on the client.
+
+What I have tried:
+1. Added openvpn-GUI (and other EXEs in bin)to Windows firewall and also disabled firewall completely
+2. Added “redirect-gateway” to the client config
+3. Set a manual IP address, gateway and DNS on the virtual adapter (ipv4)
+4. Started the “Routing and Remote Access” service (from services.msc) and enabled “sharing the wifi connection” on the interface connected to the internet
+5. Disabled ipv6 on the virtual adapter
+
+What am I missing?
+
+— ipconfig output —
+
+Scheda sconosciuta OpenVPN Data Channel Offload:
+
+   Suffisso DNS specifico per connessione:
+   Descrizione . . . . . . . . . . . . . : OpenVPN Data Channel Offload
+   Indirizzo fisico. . . . . . . . . . . :
+   DHCP abilitato. . . . . . . . . . . . : Sì
+   Configurazione automatica abilitata   : Sì
+   Indirizzo IPv6 locale rispetto al collegamento . : fe80::87d:7152:9c2:7ec%48(Preferenziale)
+   Indirizzo IPv4. . . . . . . . . . . . : 10.8.0.6(Preferenziale)
+   Subnet mask . . . . . . . . . . . . . : 255.255.255.0
+   Gateway predefinito . . . . . . . . . :
+   IAID DHCPv6 . . . . . . . . . . . : 808509809
+   DUID Client DHCPv6. . . . . . . . : XXXXXXXX
+   Server DNS . . . . . . . . . . . . .  : 1.1.1.1
+                                           1.0.0.1
+                                           8.8.8.8
+                                           8.8.4.4
+   NetBIOS su TCP/IP . . . . . . . . . . : Attivato
+Thanks
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Dec 11, 2022 @ 0:05
+When you connect from Win10, check server log file:
+sudo journalctl -xe -u openvpn
+
+↩ ∞
+Filippo Dec 11, 2022 @ 16:08
+I get this one below repeated many times at each service start/restart. It’s in Italian but it doesn’t say much except that the service has started correctly…
+Thanks
+———-
+dic 10 18:58:29 XXXXX systemd[1]: Started OpenVPN service.
+— Subject: L’unità openvpn.service termina la fase di avvio
+— Defined-By: systemd
+— Support: http://www.ubuntu.com/support
+—
+— L’unità openvpn.service ha terminato la fase di avvio.
+—
+— La fase di avvio è RESULT.
+
+↩ ∞
+André Dec 15, 2022 @ 20:24
+ExecStart=/usr/sbin/iptables -t nat -A POSTROUTING -s 10.8.0.0/24 ! -d 10.8.0.0/24 -j SNAT --to 172.105.102.90
+ExecStart=/usr/sbin/ip6tables -t nat -A POSTROUTING -s fddd:1194:1194:1194::/64 ! -d fddd:1194:1194:1194::/64 -j SNAT --to 2600:3c04::f03c:92ff:fe42:3d72
+This assumes a static public IP for the server, which is not the case for most home VPN setups.
+
+↩ ∞
+Bahram Roozbahani Dec 17, 2022 @ 11:50
+It does NOT connect.
+I had downloaded the config file to my iphone and added it to openvpn client but it does not connect.
+help please
+
+↩ ∞
+Rodrigo Feb 17, 2023 @ 7:19
+Congratulations for the work here, everything is 100% but I have a doubt, is there a limitation regarding the number of clients ????
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Feb 18, 2023 @ 2:04
+There is no limitation. You are limited by server resources such as RAM/disk, server load, network stack tuning etc.
+
+↩ ∞
+drackerly Jul 3, 2023 @ 13:03
+Works great! Thanks
+
+↩ ∞
+Darkrar Jul 9, 2023 @ 13:08
+Hello,
+I need to check the list of current client connections but I cannot find the file openvpn-status.log even if a line “status openvpn-status.log” is included in server.conf. Is there anyway to enable it?
+Thanks!
+
+↩ ∞
+🛡️Vivek Gite (Author and Admin) Vivek Gite Jul 9, 2023 @ 13:33
+Try the find. For example:
+
+sudo find / -type f -iname openvpn-status.log -ls
+↩ ∞
+Anonymous Jul 9, 2023 @ 14:20
+Just discovered that I edited a wrong server.conf file…It’s ok now. Sorry to bother you!
+
+↩ ∞
+Andrew Aug 1, 2023 @ 11:21
+Excellent tutorial. Thank you very much! added link to favorites.
+Is it has an opportunity to use WebGUI like openvpn-ac?
+
+↩ ∞
+Anonymous Aug 3, 2023 @ 9:59
+Can I create users in OpenVPN with credentials Like (user name and password)?
+
+↩ ∞
+bit101 Aug 30, 2023 @ 6:32
+Thank you very much for this script! It was so easy to install and get running openVPN. It works! :-)
+
+↩ ∞
+Steve Sep 17, 2023 @ 18:04
+just wow !! my network was already setup, so with the help of this script it took me even less than 5 minutes.
+
+↩ ∞
+Dhiraj B Oct 12, 2023 @ 16:34
+Can you modify this to work with google authenticator MFA
+
+↩ ∞
+Dee Nov 24, 2023 @ 3:20
+Great script however it doesn’t appear to setup any repos to ensure OpenVPN server is kept updated. It appears to install OpenVPN 2.5.5 however we’ve now at 2.6.8.
+
+What’s the recommended method for updating the ovpn server? Would be great if the script had an option to select for performing an update, as part of its on-screen menu.
+
+↩ ∞
+toi Jan 26, 2024 @ 16:56
+It worked like a charm. So good. All other tutorials failed. Thank you :)
+
+↩ ∞
+Leave a Reply
+Your email address will not be published. Required fields are marked *
+
+Comment *
+
+Name
+
+Use HTML <pre>...</pre> for code samples. Your comment will appear only after approval by the site admin.
+Next FAQ: Linux Iptables Delete postrouting Rule Command
+
+Previous FAQ: How do I become superuser on Ubuntu Linux using su/sudo?
+
+     
+🤓 nixCraft SHOP 👇
+
+🔎 SEARCH
+
+🔎 To search, type & hit enter...
+🔥 FEATURED ARTICLES
+130 Cool Open Source Software I Discovered in 2013
+230 Handy Bash Shell Aliases For Linux / Unix / Mac OS X
+3Top 32 Nmap Command Examples For Linux Sys/Network Admins
+425 PHP Security Best Practices For Linux Sys Admins
+530 Linux System Monitoring Tools Every SysAdmin Should Know
+640 Linux Server Hardening Security Tips
+7Linux: 25 Iptables Netfilter Firewall Examples For New SysAdmins
+8Top 20 OpenSSH Server Best Security Practices
+9Top 25 Nginx Web Server Best Security Practices
+10My 10 UNIX Command Line Mistakes
+📧 SIGN UP FOR MY NEWSLETTER
+Sign up for my newsletter
+👀 /etc
+➔Linux shell scripting tutorial
+➔RSS/Feed
+➔About nixCraft
+➔nixCraft Shop
+➔Mastodon
+     
+©2002-2024 nixCraft • Privacy • ToS • Contact/Email • Corporate patron Cloudflare
+     
